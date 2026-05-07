@@ -2,6 +2,7 @@
   "expo": {
     "name": "MyMoneyApp",
     "slug": "MyMoneyApp",
+    "scheme": "mymoneyapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#6C63FF"
     },
     "ios": {
       "supportsTablet": true
@@ -25,6 +26,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-splash-screen",
+      "expo-font"
+    ]
   }
 }
