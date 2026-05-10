@@ -50,9 +50,9 @@ function SplashLoading() {
       >
         <Ionicons name="wallet" size={40} color="#FFF0D0" />
       </View>
-      <AppText variant="h2" weight="bold" tone="inverse">Pocket Money</AppText>
+      <AppText variant="h2" weight="bold" tone="inverse">My Money</AppText>
       <AppText variant="caption" tone="inverse" style={{ opacity: 0.65, marginTop: 4, marginBottom: spacing['8'] }}>
-        Tracker
+        Personal Finance
       </AppText>
       <ActivityIndicator color="rgba(255,230,170,0.80)" size="small" />
     </LinearGradient>

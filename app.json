@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6C63FF"
+      "backgroundColor": "#F3EAD8"
     },
     "ios": {
       "supportsTablet": true
@@ -19,13 +19,24 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#F3EAD8"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "My Money",
+      "shortName": "My Money",
+      "lang": "th",
+      "themeColor": "#C49650",
+      "backgroundColor": "#F3EAD8",
+      "display": "standalone",
+      "orientation": "portrait",
+      "description": "Personal finance tracker",
+      "startUrl": "/"
     },
     "plugins": [
       "expo-router",

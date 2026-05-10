@@ -1,4 +1,4 @@
-﻿# MyMoneyApp — คู่มือโปรเจกต์
+# MyMoneyApp — คู่มือโปรเจกต์
 
 > อ่านเอกสารนี้ก่อนทุกครั้งก่อนแก้ไขหรือพัฒนาต่อ
 > อัปเดตล่าสุด: พฤษภาคม 2569
@@ -10,7 +10,7 @@
 **ชื่อ:** MyMoneyApp (Pocket Money Tracker)
 **Platform:** iOS และ Android ผ่าน Expo Go (React Native)
 **ภาษา:** TypeScript
-**สถานะ:** MVP ด้าน UI สมบูรณ์แล้ว รอเชื่อมต่อ Supabase backend จริง
+**สถานะ:** Mobile app เสร็จแล้ว 100% รอแค่กรอก Supabase credentials
 
 ### เป้าหมาย
 แอปบันทึกรายรับ-รายจ่ายส่วนตัว รองรับ:
@@ -19,6 +19,32 @@
 - ดูสรุปรายเดือนและประวัติทั้งหมด
 - ทำงานออฟไลน์ได้ (Queue ไว้ sync เมื่อกลับมา online)
 - โหมด Demo สำหรับทดลองใช้โดยไม่ต้องล็อกอิน
+
+### สถาปัตยกรรม (Architecture)
+
+```
+┌──────────────────────────────────┐         ┌─────────────────────────┐
+│   MyMoneyApp (repo นี้)          │         │   Supabase Cloud        │
+│   = Mobile Client (Frontend)     │  HTTPS  │   = Backend (managed)   │
+│                                  │  ────►  │                         │
+│   - React Native + Expo          │         │   - PostgreSQL DB       │
+│   - UI + business logic          │         │   - Auto-generated REST │
+│   - เรียก Supabase SDK            │         │   - Auth (Google OAuth) │
+│   - Offline cache (AsyncStorage) │         │   - Row-Level Security  │
+└──────────────────────────────────┘         └─────────────────────────┘
+                                              (โฮสต์ที่ supabase.com,
+                                               จัดการผ่าน Dashboard)
+```
+
+**โปรเจกต์นี้คือ mobile client เท่านั้น** ไม่มี backend code ของตัวเอง
+**Backend ที่ใช้ = Supabase** (Backend-as-a-Service) — ทำหน้าที่:
+- Database (PostgreSQL)
+- REST API (auto-generated จาก database schema)
+- Authentication (Google OAuth, email/password ฯลฯ)
+- Row-Level Security (แต่ละ user เห็นเฉพาะข้อมูลตัวเอง)
+
+ดู **[`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md)** สำหรับขั้นตอนการ setup Supabase ตั้งแต่ 0
+SQL schema สำหรับสร้าง database table อยู่ที่ [`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)
 
 ---
 
@@ -51,85 +77,107 @@
 ## 3. โครงสร้างโฟลเดอร์
 
 > **คำอธิบายสัญลักษณ์**
-> - `[FE]` = Frontend เท่านั้น — UI, component, navigation, styling
-> - `[BE]` = Backend / Integration — เชื่อมต่อ Supabase, จัดการ network, offline cache
-> - `[FE+BE]` = มีทั้งสองส่วน — logic ฝั่ง client + เรียก API
+> ทุกไฟล์ในโปรเจกต์นี้คือ **mobile client (frontend)** การเรียก backend (Supabase) ทำผ่าน HTTPS API
+> - `[UI]` = ส่วน UI / styling / layout เท่านั้น
+> - `[Logic]` = Business logic, state management, hooks (ไม่ touch UI โดยตรง)
+> - `[API]` = โค้ดที่เรียก Supabase API หรือเชื่อมต่อ external service
+> - `[Schema]` = SQL / database schema ที่รันบน Supabase server
 
 ```
 MyMoneyApp/
 │
-│  ── FRONTEND (UI / Screens / Components) ──────────────────────────────────
+│  ── หน้าจอ (Screens) ───────────────────────────────────────────────────────
 │
-├── app/                          [FE+BE]  หน้าจอทั้งหมด (expo-router routing)
-│   ├── _layout.tsx               [FE+BE]  Root layout: auth guard, font load, language init
+├── app/                          [UI+Logic+API]  expo-router file-based routing
+│   ├── _layout.tsx               [Logic]    Root: auth guard, font load, language init
 │   ├── (auth)/
-│   │   ├── _layout.tsx           [FE]     Auth group layout (Stack wrapper เฉยๆ)
-│   │   └── login.tsx             [FE+BE]  Login UI + Google OAuth flow + Demo mode
+│   │   ├── _layout.tsx           [UI]       Auth group layout (Stack wrapper)
+│   │   └── login.tsx             [UI+API]   Login UI + Google OAuth + Demo mode
 │   └── (tabs)/
-│       ├── _layout.tsx           [FE]     Custom tab bar (glass card + FAB)
-│       ├── index.tsx             [FE+BE]  Dashboard: balance, categories, recent + avatar dropdown
-│       ├── add.tsx               [FE+BE]  Form เพิ่มรายการ + บันทึกลง Supabase / offline cache
-│       ├── history.tsx           [FE+BE]  ประวัติ + filter + ดึงข้อมูลจาก Supabase
-│       └── settings.tsx          [FE]     ตั้งค่าภาษา, sign out, about (UI เท่านั้น)
+│       ├── _layout.tsx           [UI]       Custom glass tab bar + FAB
+│       ├── index.tsx             [UI+API]   Dashboard + avatar dropdown
+│       ├── add.tsx               [UI+API]   Form เพิ่มรายการ
+│       ├── history.tsx           [UI+API]   ประวัติ + filter
+│       └── settings.tsx          [UI]       ตั้งค่าภาษา / sign out / about
 │
-├── components/                   [FE]     UI Components ที่ใช้ซ้ำทั่วแอป
-│   ├── ui/                       [FE]     Design System primitives
-│   │   ├── AppText.tsx           [FE]     Text component (Kanit font + design tokens)
-│   │   ├── Button.tsx            [FE]     Animated button (press feedback + haptic)
-│   │   ├── GlassCard.tsx         [FE]     Frosted glass card (BlurView / fallback)
-│   │   └── index.ts              [FE]     Barrel export
-│   ├── CategoryPicker.tsx        [FE]     Horizontal scroll เลือกหมวดหมู่
-│   ├── DatePickerModal.tsx       [FE]     Calendar modal เลือกวัน/เดือน (i18n-aware)
-│   ├── ErrorBoundary.tsx         [FE]     React error boundary
-│   ├── OfflineBanner.tsx         [FE+BE]  Banner เมื่อ offline (ใช้ useNetworkStatus)
-│   └── TransactionCard.tsx       [FE]     การ์ดแสดงรายการธุรกรรม
+│  ── Components ─────────────────────────────────────────────────────────────
 │
-├── constants/                    [FE]     ค่าคงที่ / ข้อมูล static
-│   ├── categories.ts             [FE]     รายการหมวดหมู่ (label ไทย + อังกฤษ, icon, color)
-│   ├── demoTransactions.ts       [FE]     Mock data สำหรับ Demo mode
-│   ├── i18n.ts                   [FE]     ข้อความ UI ทั้งหมด (en + th)
-│   └── theme.ts                  [FE]     Design tokens (สี, font, spacing, shadow, radius)
+├── components/                   [UI]
+│   ├── ui/                       [UI]       Design System primitives
+│   │   ├── AppText.tsx           [UI]       Typed text (Kanit font + design tokens)
+│   │   ├── Button.tsx            [UI]       Animated button (haptic feedback)
+│   │   ├── GlassCard.tsx         [UI]       Frosted glass card (BlurView)
+│   │   └── index.ts              [UI]       Barrel export
+│   ├── CategoryPicker.tsx        [UI]       Horizontal scroll หมวดหมู่
+│   ├── DatePickerModal.tsx       [UI]       Calendar modal (date / month)
+│   ├── ErrorBoundary.tsx         [UI]       React error boundary
+│   ├── OfflineBanner.tsx         [UI]       Banner ตอน offline
+│   └── TransactionCard.tsx       [UI]       การ์ดแสดงรายการ
 │
-│  ── BACKEND / INTEGRATION ────────────────────────────────────────────────
+│  ── ค่าคงที่ / Static Data ──────────────────────────────────────────────────
 │
-├── services/                     [BE]     เชื่อมต่อ external services
-│   ├── supabase.ts               [BE]     Supabase client instance (Auth + Database)
-│   └── sync.ts                   [BE]     Sync offline queue → Supabase เมื่อ online
+├── constants/                    [Logic]
+│   ├── categories.ts             [Logic]    หมวดหมู่ (TH + EN labels, icon, color)
+│   ├── demoTransactions.ts       [Logic]    Mock data สำหรับ Demo mode
+│   ├── i18n.ts                   [Logic]    ข้อความ UI ทั้งหมด (en + th)
+│   └── theme.ts                  [UI]       Design tokens (สี, font, spacing, shadow)
 │
-├── utils/                        [BE]     Helper ฝั่ง data / storage
-│   └── offlineCache.ts           [BE]     AsyncStorage CRUD สำหรับ pending transactions
+│  ── Hooks (Reusable Logic) ─────────────────────────────────────────────────
 │
-│  ── STATE MANAGEMENT ──────────────────────────────────────────────────────
+├── hooks/                        [Logic+API]
+│   ├── useNetworkStatus.ts       [Logic]    Online/offline detection (NetInfo)
+│   ├── useTransactions.ts        [API]      React Query: fetch / add / delete
+│   └── useTranslation.ts         [Logic]    { t, language, setLanguage, locale }
 │
-├── stores/                       [FE+BE]  Global state (Zustand)
-│   ├── authStore.ts              [FE+BE]  Auth state: session, user, isDemo, signOut
-│   ├── languageStore.ts          [FE]     Language state + AsyncStorage persistence
-│   └── transactionStore.ts       [FE]     UI filter state: selectedMonth, selectedCategory
+│  ── Services (External Integration) ────────────────────────────────────────
 │
-│  ── SHARED / CROSS-CUTTING ────────────────────────────────────────────────
+├── services/                     [API]
+│   ├── supabase.ts               [API]      Supabase client instance
+│   └── sync.ts                   [API]      Sync offline queue → Supabase
 │
-├── hooks/                        [FE+BE]  Custom React Hooks
-│   ├── useNetworkStatus.ts       [BE]     ตรวจสอบ online/offline ผ่าน NetInfo
-│   ├── useTransactions.ts        [FE+BE]  React Query hooks: fetch, add, delete transactions
-│   └── useTranslation.ts         [FE]     คืน { t, language, setLanguage, locale }
+│  ── State Management (Zustand) ─────────────────────────────────────────────
 │
-├── types/                        [FE+BE]  TypeScript type definitions
-│   └── index.ts                  [FE+BE]  Transaction, Category, PendingTransaction, etc.
+├── stores/                       [Logic]
+│   ├── authStore.ts              [Logic]    Session, user, isDemo, signOut
+│   ├── languageStore.ts          [Logic]    Language + AsyncStorage persistence
+│   └── transactionStore.ts       [Logic]    UI filters: selectedMonth, selectedCategory
 │
-│  ── STATIC ASSETS / CONFIG ─────────────────────────────────────────────────
+│  ── Utils ──────────────────────────────────────────────────────────────────
 │
-├── assets/                       [FE]     รูปภาพและไอคอน
-│   ├── icon.png                  [FE]     App icon (1024×1024)
-│   ├── adaptive-icon.png         [FE]     Android adaptive icon
-│   ├── splash-icon.png           [FE]     Splash screen
-│   └── favicon.png               [FE]     Web favicon
+├── utils/                        [Logic]
+│   └── offlineCache.ts           [Logic]    AsyncStorage CRUD สำหรับ offline queue
 │
-├── .env                          [BE]     ⚠️ Supabase URL + ANON KEY (อย่า commit)
-├── app.json                      [FE+BE]  Expo config (ชื่อแอป, scheme, version)
-├── babel.config.js               [FE]     Babel preset (expo เท่านั้น)
-├── metro.config.js               [FE]     Metro bundler config
-├── tsconfig.json                 [FE+BE]  TypeScript config
-└── package.json                  [FE+BE]  Dependencies + scripts
+│  ── Types ──────────────────────────────────────────────────────────────────
+│
+├── types/                        [Logic]
+│   └── index.ts                  [Logic]    Transaction, Category, PendingTransaction
+│
+│  ── 🔥 Backend (Supabase Schema) ──────────────────────────────────────────
+│
+├── supabase/                     [Schema]   SQL ที่รันบน Supabase server (ไม่ใช่โค้ดในแอป)
+│   └── migrations/
+│       └── 0001_init.sql         [Schema]   สร้าง transactions table + RLS policies
+│
+│  ── Static Assets ──────────────────────────────────────────────────────────
+│
+├── assets/                       [UI]       รูปภาพ + ไอคอน
+│   ├── icon.png                  [UI]       App icon (1024×1024)
+│   ├── adaptive-icon.png         [UI]       Android adaptive icon
+│   ├── splash-icon.png           [UI]       Splash screen
+│   └── favicon.png               [UI]       Web favicon
+│
+│  ── Config / Docs ──────────────────────────────────────────────────────────
+│
+├── .env                          [Config]   ⚠️ Supabase URL + ANON KEY (gitignored)
+├── .env.example                  [Config]   Template ของ .env (commit ได้)
+├── app.json                      [Config]   Expo config (ชื่อ, scheme, version)
+├── babel.config.js               [Config]   Babel preset (expo เท่านั้น)
+├── metro.config.js               [Config]   Metro bundler config
+├── tsconfig.json                 [Config]   TypeScript config
+├── package.json                  [Config]   Dependencies + scripts
+├── PROJECT_GUIDE.md              [Docs]     คู่มือโปรเจกต์ (ไฟล์นี้)
+├── SUPABASE_SETUP.md             [Docs]     คู่มือ setup Supabase ตั้งแต่ 0
+└── ASSETS_GUIDE.md               [Docs]     คู่มือเตรียม assets
 ```
 
 ### สรุปว่าจะแก้อะไรต้องไปที่ไหน
@@ -138,17 +186,20 @@ MyMoneyApp/
 |---|---|
 | UI หน้าจอ / layout | `app/(tabs)/*.tsx` หรือ `app/(auth)/*.tsx` |
 | Component ที่ใช้ซ้ำ (card, text, button) | `components/ui/` |
-| สี / font / spacing / shadow ทั้งแอป | `constants/theme.ts` |
+| สี / font / spacing / shadow ทั่วแอป | `constants/theme.ts` |
 | ข้อความ UI / คำแปล | `constants/i18n.ts` |
 | หมวดหมู่รายการ | `constants/categories.ts` |
-| เชื่อมต่อ Supabase / auth | `services/supabase.ts` |
-| sync offline → online | `services/sync.ts` |
+| Mock data สำหรับ Demo | `constants/demoTransactions.ts` |
+| Supabase client config | `services/supabase.ts` |
+| Sync offline → online | `services/sync.ts` |
 | เก็บรายการรอ sync | `utils/offlineCache.ts` |
 | Auth state (login/logout) | `stores/authStore.ts` |
 | ภาษาแอป | `stores/languageStore.ts` + `constants/i18n.ts` |
-| ดึง/เพิ่ม/ลบ transaction | `hooks/useTransactions.ts` |
+| ดึง / เพิ่ม / ลบ transaction | `hooks/useTransactions.ts` |
 | Navigation / tab bar | `app/(tabs)/_layout.tsx` |
 | TypeScript types | `types/index.ts` |
+| **Database schema (Supabase server)** | `supabase/migrations/*.sql` แล้วรันใน Supabase SQL Editor |
+| **Setup Supabase ตั้งแต่ 0** | อ่าน `SUPABASE_SETUP.md` |
 
 ---
 
@@ -890,28 +941,14 @@ Screen (app/tabs/*.tsx)
 
 ## 14. สิ่งที่ต้องทำ (To-Do)
 
-### ⚠️ ต้องทำก่อนใช้งานจริง (Backend)
-- [ ] สร้าง Supabase project และกรอก `.env`
-- [ ] สร้าง table `transactions` ใน Supabase:
-  ```sql
-  CREATE TABLE transactions (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users NOT NULL,
-    amount DECIMAL(12,2) NOT NULL,
-    category TEXT NOT NULL,
-    note TEXT DEFAULT '',
-    date DATE NOT NULL,
-    type TEXT CHECK (type IN ('expense','income')) NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-  );
-  ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
-  CREATE POLICY "Users can CRUD own transactions"
-    ON transactions FOR ALL USING (auth.uid() = user_id);
-  ```
-- [ ] เปิด Google OAuth ใน Supabase → Authentication → Providers
-- [ ] เพิ่ม Redirect URL `mymoneyapp://` ใน Supabase
-- [ ] ทดสอบ Google Login จริง
+### ⚠️ ต้องทำก่อนใช้งานจริง (เชื่อม Supabase)
+
+ทำตามขั้นตอนใน **[`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md)** มี 5 ขั้นตอนหลัก:
+1. สร้าง Supabase project
+2. รัน SQL schema (`supabase/migrations/0001_init.sql`)
+3. กรอก `.env` (URL + ANON KEY)
+4. ตั้งค่า Google OAuth (Google Cloud Console + Supabase Dashboard)
+5. ทดสอบ login + เพิ่มรายการ
 
 ### ✨ Features ในอนาคต
 - [ ] แก้ไขรายการ (ตอนนี้มีแค่เพิ่ม + ลบ)
@@ -926,14 +963,16 @@ Screen (app/tabs/*.tsx)
 
 ## 15. วิธีรันโปรเจกต์
 
+### ครั้งแรก (Setup)
+
 ```bash
 # 1. ติดตั้ง dependencies
 npm install --legacy-peer-deps
 
 # 2. ตั้งค่า environment variables
-# สร้างไฟล์ .env และใส่ค่า Supabase:
-# EXPO_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-# EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+cp .env.example .env
+# แล้วแก้ไฟล์ .env กรอก URL + ANON KEY ของ Supabase
+# (ดูวิธีหาใน SUPABASE_SETUP.md → Step 3)
 
 # 3. เริ่ม dev server
 npx expo start --clear
@@ -943,7 +982,16 @@ npx expo start --clear
 # กด 'i' สำหรับ iOS simulator
 ```
 
-> **ยังไม่มี Supabase project?** แอปทำงานได้เต็มรูปแบบใน **Demo mode** — กด "ทดลองใช้งาน" บนหน้า Login
+### ครั้งต่อไป
+
+```bash
+npx expo start
+```
+
+> **ยังไม่ได้ setup Supabase?** แอปทำงานได้เต็มรูปแบบใน **Demo mode** — กด "ทดลองใช้งาน" บนหน้า Login
+> เมื่อพร้อม setup จริง ทำตาม [`SUPABASE_SETUP.md`](./SUPABASE_SETUP.md)
+
+> **หมายเหตุ iOS:** Expo Go เหมาะกับพัฒนา UI และ Demo mode แต่ Google OAuth บน iPhone จริงอาจไม่ redirect กลับแอปเพราะข้อจำกัดของ `exp://` scheme ใน Expo Go ให้ทดสอบ OAuth ด้วย development build / production build ที่ใช้ scheme `mymoneyapp://`
 
 ---
 
@@ -968,6 +1016,8 @@ npx expo start --clear
 9. **Design tokens ทั้งหมดอยู่ใน `constants/theme.ts`** — ห้าม hardcode สี / font size / spacing / shadow / radius ใน component เด็ดขาด
 
 10. **Category มี `label` (ไทย) และ `labelEn` (อังกฤษ)** — ทุก component อ่าน `locale` จาก `useTranslation()` แล้วเลือก field ที่ถูกต้อง
+
+11. **Google OAuth ใช้ custom scheme `mymoneyapp://auth/callback`** — production/development build จะ register scheme นี้กับ native app จริง ส่วน Expo Go ใช้ `exp://` จึงอาจทดสอบ OAuth บน iOS physical device ไม่ได้
 
 ---
 

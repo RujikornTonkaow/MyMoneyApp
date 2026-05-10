@@ -8,12 +8,14 @@
 
 | ไฟล์ | ขนาด | รายละเอียด |
 |------|------|-----------|
-| `assets/icon.png` | 1024×1024 px | App icon บน Home Screen (ควรเป็นพื้นหลังสี พร้อมโลโก้กลาง) |
-| `assets/adaptive-icon.png` | 1024×1024 px | Android Adaptive Icon (foreground layer, พื้นหลังโปร่งใส) |
-| `assets/splash-icon.png` | 1284×2778 px | Splash Screen (ใช้ขนาด iPhone 14 Pro Max เป็น base) |
-| `assets/favicon.png` | 48×48 px | เว็บ favicon |
+| `assets/icon.png` | 1024×1024 px | App icon บน Home Screen |
+| `assets/adaptive-icon.png` | 1024×1024 px | Android Adaptive Icon foreground |
+| `assets/splash-icon.png` | 1024×1024 px | Splash icon ตอนเปิดแอป |
+| `assets/favicon.png` | 1024×1024 px | Web/PWA favicon (ใช้รูปเดียวกับ app icon เพื่อให้ brand ตรงกัน) |
 
-**แนะนำ:** โลโก้แอปควรเป็นไอคอนเหรียญ/กระเป๋าเงิน บนพื้นสีม่วง-น้ำเงิน gradient `#6C63FF → #4F46E5`
+**ปัจจุบัน:** ใช้ไอคอนถุงเงินสีขาวบนพื้น gradient ครีม-ส้ม earth tone ให้เข้ากับ theme หลัก `#F3EAD8`
+
+> ถ้าเปลี่ยน icon อีกครั้ง ให้ใช้ไฟล์ PNG 1024×1024 แล้ววางทับชื่อเดิมทั้ง 4 ไฟล์ เพื่อให้ตรงกับ `app.json`
 
 ---
 

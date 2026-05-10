@@ -1,20 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  View, TouchableOpacity, ActivityIndicator, Alert, StyleSheet,
+  View, TouchableOpacity, ActivityIndicator, Alert, Platform, StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
+import * as QueryParams    from 'expo-auth-session/build/QueryParams';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase }        from '../../services/supabase';
 import { useAuthStore }     from '../../stores/authStore';
 import { useTranslation }   from '../../hooks/useTranslation';
-import { AppText, Button, GlassCard } from '../../components/ui';
+import { AppText, GlassCard } from '../../components/ui';
 import { colors, radii, shadows, spacing } from '../../constants/theme';
 
 WebBrowser.maybeCompleteAuthSession();
+
+const createSessionFromUrl = async (url: string) => {
+  const { params, errorCode } = QueryParams.getQueryParams(url);
+  if (errorCode) throw new Error(errorCode);
+
+  const { access_token, refresh_token } = params;
+  if (!access_token) return null;
+
+  const { data, error } = await supabase.auth.setSession({
+    access_token,
+    refresh_token,
+  });
+  if (error) throw error;
+  return data.session;
+};
 
 
 export default function LoginScreen() {
@@ -23,6 +39,15 @@ export default function LoginScreen() {
   const { t }     = useTranslation();
   const enterDemo = useAuthStore((s) => s.enterDemo);
   const [loading, setLoading] = useState(false);
+
+  // On web, after Google redirects back to /auth/callback, tokens arrive
+  // in the URL fragment. Parse them once on mount to complete the session.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    if (typeof window === 'undefined') return;
+    if (!window.location.hash.includes('access_token')) return;
+    createSessionFromUrl(window.location.href).catch(() => {});
+  }, []);
 
   const FEATURES = [
     { icon: 'shield-checkmark' as const, label: t.login.secure,   color: colors.semantic.success },
@@ -35,20 +60,32 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const redirectTo = makeRedirectUri({ scheme: 'mymoneyapp' });
+      const redirectTo = makeRedirectUri({
+        scheme: 'mymoneyapp',
+        path:   'auth/callback',
+      });
+
+      // Web: let Supabase redirect the main window directly. Native: open
+      // an in-app browser session and read the redirected URL ourselves.
+      if (Platform.OS === 'web') {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo },
+        });
+        if (error) throw error;
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo, skipBrowserRedirect: true },
       });
       if (error) throw error;
       if (!data.url) throw new Error('No OAuth URL');
+
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
       if (result.type === 'success' && result.url) {
-        const url    = new URL(result.url);
-        const params = new URLSearchParams(url.hash.slice(1));
-        const at     = params.get('access_token');
-        const rt     = params.get('refresh_token');
-        if (at && rt) await supabase.auth.setSession({ access_token: at, refresh_token: rt });
+        await createSessionFromUrl(result.url);
       }
     } catch (err) {
       Alert.alert('เกิดข้อผิดพลาด', err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ');
@@ -91,10 +128,10 @@ export default function LoginScreen() {
         {/* Title */}
         <View style={styles.titleSection}>
           <AppText variant="title" weight="bold" align="center" style={{ color: colors.text.primary }}>
-            Pocket Money
+            My
           </AppText>
           <AppText variant="title" weight="extrabold" align="center" style={{ color: colors.brand[500] }}>
-            Tracker
+            Money
           </AppText>
             <AppText
             variant="bodyMd"
