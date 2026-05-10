@@ -75,12 +75,14 @@ const tagsToInject = `
         min-height: 0;
         height: 100%;
       }
-      #root > div,
-      #root > div > div,
-      #root > div > div > div,
-      #root > div > div > div > div,
-      #root > div > div > div > div > div,
-      #root > div > div > div > div > div > div {
+      /* :only-child targets Expo Router's single-child wrapper divs without
+         affecting multi-child containers like the tab bar row.             */
+      #root > div:only-child,
+      #root > div:only-child > div:only-child,
+      #root > div:only-child > div:only-child > div:only-child,
+      #root > div:only-child > div:only-child > div:only-child > div:only-child,
+      #root > div:only-child > div:only-child > div:only-child > div:only-child > div:only-child,
+      #root > div:only-child > div:only-child > div:only-child > div:only-child > div:only-child > div:only-child {
         display: flex !important;
         flex-direction: column !important;
         flex: 1 !important;
