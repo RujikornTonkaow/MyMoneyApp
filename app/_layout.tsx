@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import {
   useFonts,
   Kanit_300Light,
@@ -109,10 +110,12 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <StatusBar style="dark" />
-        <AuthGuard />
-      </QueryClientProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <QueryClientProvider client={queryClient}>
+          <StatusBar style="dark" />
+          <AuthGuard />
+        </QueryClientProvider>
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 }

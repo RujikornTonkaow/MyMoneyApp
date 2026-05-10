@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, Alert, StyleSheet, ScrollView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { useAuthStore }      from '../../stores/authStore';
 import { useTranslation }    from '../../hooks/useTranslation';
 import { AppText, GlassCard } from '../../components/ui';
 import { supabase }           from '../../services/supabase';
+import { confirmAction }      from '../../utils/alert';
 import { colors, radii, shadows, spacing } from '../../constants/theme';
 import Constants from 'expo-constants';
 import { type Language } from '../../constants/i18n';
@@ -36,16 +37,17 @@ export default function SettingsScreen() {
   const displayName = isDemo ? 'Demo' : 'User';
 
   const handleSignOut = () => {
-    Alert.alert(t.settings.signOutConfirm, t.settings.signOutMsg, [
-      { text: t.settings.cancel, style: 'cancel' },
-      {
-        text: t.settings.signOut, style: 'destructive',
-        onPress: async () => {
-          if (!isDemo) await supabase.auth.signOut();
-          signOut();
-        },
+    confirmAction({
+      title:       t.settings.signOutConfirm,
+      message:     t.settings.signOutMsg,
+      confirmText: t.settings.signOut,
+      cancelText:  t.settings.cancel,
+      destructive: true,
+      onConfirm:   async () => {
+        if (!isDemo) await supabase.auth.signOut();
+        signOut();
       },
-    ]);
+    });
   };
 
   const handleLanguage = (code: Language) => {

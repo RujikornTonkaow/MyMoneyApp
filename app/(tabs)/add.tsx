@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  View, TextInput, TouchableOpacity, Alert, ScrollView,
+  View, TextInput, TouchableOpacity, ScrollView,
   KeyboardAvoidingView, Platform, ActivityIndicator, StyleSheet, Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { notifyAlert } from '../../utils/alert';
 import CategoryPicker        from '../../components/CategoryPicker';
 import OfflineBanner         from '../../components/OfflineBanner';
 import DatePickerModal       from '../../components/DatePickerModal';
@@ -47,17 +48,17 @@ export default function AddScreen() {
 
   const handleSave = async () => {
     const parsed = parseFloat(amount.replace(/,/g, ''));
-    if (!parsed || parsed <= 0) { Alert.alert(t.add.errorAmount); return; }
+    if (!parsed || parsed <= 0) { notifyAlert(t.add.errorAmount); return; }
     try {
       await addTransaction.mutateAsync({ amount: parsed, category, note: note.trim(), date, type });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       router.replace('/(tabs)');
     } catch (err) {
       if (err instanceof Error && err.message === 'DEMO_NO_SAVE') {
-        Alert.alert(t.add.demoMode, t.add.demoSaveNote);
+        notifyAlert(t.add.demoMode, t.add.demoSaveNote);
         return;
       }
-      Alert.alert(t.common.error, t.add.errorSave);
+      notifyAlert(t.common.error, t.add.errorSave);
     }
   };
 

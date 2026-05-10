@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
-  View, TouchableOpacity, ActivityIndicator, Alert, Platform, StyleSheet,
+  View, TouchableOpacity, ActivityIndicator, Platform, StyleSheet,
 } from 'react-native';
+import { notifyAlert } from '../../utils/alert';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -95,7 +96,7 @@ export default function LoginScreen() {
         await createSessionFromUrl(result.url);
       }
     } catch (err) {
-      Alert.alert('เกิดข้อผิดพลาด', err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ');
+      notifyAlert('เกิดข้อผิดพลาด', err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ');
     } finally {
       setLoading(false);
     }

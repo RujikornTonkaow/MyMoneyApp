@@ -31,6 +31,9 @@ for (const file of requiredAssets) {
 }
 
 const TAG_MARKER = '<!-- pwa-injected -->';
+// black-translucent lets the page background extend behind the iOS status
+// bar; combined with the cream body background and safe-area-insets in the
+// React layer we get an edge-to-edge look in PWA standalone mode.
 const tagsToInject = `
     ${TAG_MARKER}
     <link rel="manifest" href="/manifest.webmanifest">
@@ -38,10 +41,14 @@ const tagsToInject = `
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="My Money">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
+    <style id="pwa-base">
+      html, body { background-color: #F3EAD8; }
+    </style>
 `.trim();
 
 let html = readFileSync(indexPath, 'utf8');

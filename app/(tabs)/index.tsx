@@ -1,6 +1,7 @@
 import {
-  View, ScrollView, TouchableOpacity, Alert, RefreshControl, StyleSheet, Modal,
+  View, ScrollView, TouchableOpacity, RefreshControl, StyleSheet, Modal,
 } from 'react-native';
+import { confirmAction } from '../../utils/alert';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -60,16 +61,17 @@ export default function HomeScreen() {
 
   const handleSignOut = () => {
     setMenuOpen(false);
-    Alert.alert(t.settings.signOutConfirm, t.settings.signOutMsg, [
-      { text: t.settings.cancel, style: 'cancel' },
-      {
-        text: t.settings.signOut, style: 'destructive',
-        onPress: async () => {
-          if (!isDemo) await supabase.auth.signOut();
-          signOut();
-        },
+    confirmAction({
+      title:       t.settings.signOutConfirm,
+      message:     t.settings.signOutMsg,
+      confirmText: t.settings.signOut,
+      cancelText:  t.settings.cancel,
+      destructive: true,
+      onConfirm:   async () => {
+        if (!isDemo) await supabase.auth.signOut();
+        signOut();
       },
-    ]);
+    });
   };
 
   const totalExpense = transactions.filter((tx) => tx.type === 'expense').reduce((s, tx) => s + tx.amount, 0);
