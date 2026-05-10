@@ -137,19 +137,19 @@ function TabBar({ state, descriptors, navigation }: {
     );
   };
 
-  // Floating tab card sits a small fixed gap above the safe-area edge so
-  // the home-indicator never overlaps it but it still hugs the bottom.
-  const FLOAT_GAP = 6;
-  const bottomPad = (insets.bottom > 0 ? insets.bottom : spacing['3']) + FLOAT_GAP;
+  // The tab card stretches all the way to the bottom edge of the screen.
+  // Icons stay inside the top TAB_H slice; the rest is a safe-area buffer
+  // for the iOS home indicator. This avoids the empty cream strip below
+  // a "floating" tab bar in PWA standalone mode.
+  const cardHeight = TAB_H + insets.bottom;
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: bottomPad }]} pointerEvents="box-none">
-      {/* Single glass card containing all 3 items */}
-      <View style={styles.card}>
+    <View style={styles.wrapper} pointerEvents="box-none">
+      <View style={[styles.card, { height: cardHeight, paddingBottom: insets.bottom }]}>
         <GlassFill />
         <View style={styles.cardBorder} pointerEvents="none" />
 
-        <View style={styles.row}>
+        <View style={[styles.row, { height: TAB_H }]}>
           {/* Left side tabs */}
           {leftTabs.map(renderTab)}
 
@@ -208,19 +208,20 @@ export default function TabsLayout() {
 // ── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   wrapper: {
-    position:          'absolute',
-    bottom:            0,
-    left:              0,
-    right:             0,
-    paddingHorizontal: spacing['5'],
+    position: 'absolute',
+    bottom:   0,
+    left:     0,
+    right:    0,
   },
 
-  // Single glass card
+  // Glass tab card — flush to bottom and side edges, rounded only on top
   card: {
-    height:       TAB_H,
-    borderRadius: radii['2xl'],
-    overflow:     'hidden',
-    backgroundColor: 'rgba(255,250,240,0.16)',
+    overflow:               'hidden',
+    backgroundColor:        'rgba(255,250,240,0.16)',
+    borderTopLeftRadius:    radii['2xl'],
+    borderTopRightRadius:   radii['2xl'],
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     ...shadows.lg,
   },
   glassBase: {
@@ -229,12 +230,15 @@ const styles = StyleSheet.create({
   },
   cardBorder: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: radii['2xl'],
-    borderWidth:       1.2,
-    borderTopColor:    'rgba(255,255,255,0.80)',
-    borderLeftColor:   'rgba(255,255,255,0.70)',
-    borderBottomColor: 'rgba(200,160,100,0.24)',
-    borderRightColor:  'rgba(200,160,100,0.22)',
+    borderTopLeftRadius:  radii['2xl'],
+    borderTopRightRadius: radii['2xl'],
+    borderTopWidth:       1.2,
+    borderLeftWidth:      1.2,
+    borderRightWidth:     1.2,
+    borderBottomWidth:    0,
+    borderTopColor:       'rgba(255,255,255,0.80)',
+    borderLeftColor:      'rgba(255,255,255,0.70)',
+    borderRightColor:     'rgba(200,160,100,0.22)',
   },
 
   // Row inside the card

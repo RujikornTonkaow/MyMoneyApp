@@ -48,6 +48,10 @@ const tagsToInject = `
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
     <style id="pwa-base">
       html, body { background-color: #F3EAD8; }
+      /* iOS Safari auto-zooms into any focused input whose font-size is
+         smaller than 16px and never zooms back out. Force every form
+         control to 16px so the page stays at its natural scale. */
+      input, textarea, select { font-size: 16px !important; }
     </style>
 `.trim();
 

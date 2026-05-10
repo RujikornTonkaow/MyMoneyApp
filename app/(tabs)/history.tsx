@@ -182,7 +182,7 @@ export default function HistoryScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => <TransactionCard transaction={item} index={index} />}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 148, paddingTop: spacing['2'] }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 64 + spacing['6'], paddingTop: spacing['2'] }}
           initialNumToRender={15}
         />
       )}

@@ -97,7 +97,7 @@ export default function HomeScreen() {
       <OfflineBanner />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 148 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 64 + spacing['6'] }}
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.brand[500]} />
         }

@@ -46,12 +46,22 @@ export default function AddScreen() {
   const headerGrad  = isExpense ? colors.gradient.expense : colors.gradient.income;
   const accentColor = isExpense ? colors.semantic.danger  : colors.semantic.success;
 
+  const resetForm = () => {
+    setAmount('');
+    setNote('');
+    setDate(new Date().toISOString().slice(0, 10));
+    setType('expense');
+    setCategory('food');
+  };
+
   const handleSave = async () => {
     const parsed = parseFloat(amount.replace(/,/g, ''));
     if (!parsed || parsed <= 0) { notifyAlert(t.add.errorAmount); return; }
     try {
       await addTransaction.mutateAsync({ amount: parsed, category, note: note.trim(), date, type });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      // Clear inputs so the next visit to this screen starts fresh.
+      resetForm();
       router.replace('/(tabs)');
     } catch (err) {
       if (err instanceof Error && err.message === 'DEMO_NO_SAVE') {
@@ -78,7 +88,7 @@ export default function AddScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 148 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 64 + spacing['6'] }}
       >
         {/* ── Header ── */}
         <LinearGradient
