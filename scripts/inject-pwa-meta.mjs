@@ -105,16 +105,22 @@ const tagsToInject = `
         min-height: 0;
       }
 
-      /* Tab bar inner row must stay horizontal — PWA base rules above can
-         otherwise win over RN Web flex in some WebKit builds. */
+      /* ── Custom tab bar overrides ──────────────────────────────
+         The broad "flex:1" rules above have higher CSS specificity
+         than the RN Web generated class names, so they override
+         inline-like styles. The tab bar host and its glass card
+         must NOT stretch — undo flex:1 here with !important.     */
+      #mymoney-tab-bar-host {
+        flex: none !important;
+        z-index: 2147483000 !important;
+      }
+      #mymoney-tab-bar-host > div {
+        flex: none !important;
+      }
       #mymoney-tab-bar-row {
+        flex: 1 !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-      }
-
-      /* Custom tab bar host — must sit above detached screen layers on WebKit */
-      #mymoney-tab-bar-host {
-        z-index: 2147483000 !important;
       }
 
       /* iOS Safari auto-zooms focused inputs with font-size < 16px. */
