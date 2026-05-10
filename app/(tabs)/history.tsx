@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { useTransactionStore } from '../../stores/transactionStore';
+import { useMonthFilterStore } from '../../stores/monthFilterStore';
 import { useTransactions }     from '../../hooks/useTransactions';
 import { useTranslation }      from '../../hooks/useTranslation';
 import TransactionCard          from '../../components/TransactionCard';
@@ -21,7 +21,7 @@ import { colors, radii, shadows, spacing } from '../../constants/theme';
 export default function HistoryScreen() {
   const insets            = useSafeAreaInsets();
   const { t, locale }     = useTranslation();
-  const { selectedMonth, setSelectedMonth } = useTransactionStore();
+  const { selectedMonth, setSelectedMonth } = useMonthFilterStore();
   const { data: transactions = [], isLoading, refetch } = useTransactions(selectedMonth);
 
   const [catFilter,      setCatFilter]      = useState('all');

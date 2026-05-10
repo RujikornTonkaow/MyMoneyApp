@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore }        from '../../stores/authStore';
-import { useTransactionStore } from '../../stores/transactionStore';
+import { useMonthFilterStore } from '../../stores/monthFilterStore';
 import { useTransactions }     from '../../hooks/useTransactions';
 import { useTranslation }      from '../../hooks/useTranslation';
 import { supabase }            from '../../services/supabase';
@@ -50,7 +50,7 @@ export default function HomeScreen() {
   const user          = useAuthStore((s) => s.user);
   const isDemo        = useAuthStore((s) => s.isDemo);
   const signOut       = useAuthStore((s) => s.signOut);
-  const selectedMonth = useTransactionStore((s) => s.selectedMonth);
+  const selectedMonth = useMonthFilterStore((s) => s.selectedMonth);
   const { data: transactions = [], isLoading, refetch } = useTransactions(selectedMonth);
   const [menuOpen, setMenuOpen] = useState(false);
 
