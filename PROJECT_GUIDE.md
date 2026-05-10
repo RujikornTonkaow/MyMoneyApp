@@ -1022,3 +1022,9 @@ npx expo start
 ---
 
 *MyMoneyApp — อัปเดตล่าสุด พฤษภาคม 2569*
+
+local run for test ui don't remember that
+
+1.create .env
+2.paste this ----> EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
