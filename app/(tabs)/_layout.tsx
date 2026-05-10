@@ -137,15 +137,18 @@ function TabBar({ state, descriptors, navigation }: {
     );
   };
 
-  // Floating tab card: keep icons inside a compact 64px slice and lift the
-  // whole card above the iOS home-indicator. The empty space below is
-  // handled by stretching the page background to the screen edge instead
-  // of inflating the tab bar itself.
-  const FLOAT_GAP = 6;
-  const bottomPad = (insets.bottom > 0 ? insets.bottom : spacing['3']) + FLOAT_GAP;
+  // Lift the whole bar above the home indicator. Use `bottom: …` instead of
+  // `paddingBottom` on the host — padding left a transparent strip inside the
+  // host the same colour as the page, which looked like a layout bug (image 2).
+  const FLOAT_GAP   = 6;
+  const bottomLift = (insets.bottom > 0 ? insets.bottom : spacing['3']) + FLOAT_GAP;
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: bottomPad }]} pointerEvents="box-none">
+    <View
+      nativeID="mymoney-tab-bar-host"
+      style={[styles.wrapper, { bottom: bottomLift }]}
+      pointerEvents="box-none"
+    >
       <View style={styles.card}>
         <GlassFill />
         <View style={styles.cardBorder} pointerEvents="none" />
@@ -195,6 +198,9 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   return (
     <Tabs
+      /* Detached native screens can paint above this custom absolute tab bar
+         (web/PWA and sometimes iOS). */
+      detachInactiveScreens={false}
       tabBar={(props) => <TabBar {...(props as Parameters<typeof TabBar>[0])} />}
       screenOptions={{ headerShown: false }}
     >
@@ -210,10 +216,12 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   wrapper: {
     position:          'absolute',
-    bottom:            0,
     left:              0,
     right:             0,
+    zIndex:            10000,
+    elevation:         10000,
     paddingHorizontal: spacing['5'],
+    /* `bottom` is set inline from safe-area so the host does not extend under the home indicator */
   },
 
   // Floating glass card — compact 64px height, rounded on all corners

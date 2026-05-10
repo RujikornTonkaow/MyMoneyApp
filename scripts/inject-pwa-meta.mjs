@@ -112,6 +112,11 @@ const tagsToInject = `
         flex-wrap: nowrap !important;
       }
 
+      /* Custom tab bar host — must sit above detached screen layers on WebKit */
+      #mymoney-tab-bar-host {
+        z-index: 2147483000 !important;
+      }
+
       /* iOS Safari auto-zooms focused inputs with font-size < 16px. */
       input, textarea, select { font-size: 16px !important; }
     </style>
