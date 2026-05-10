@@ -48,12 +48,15 @@ const tagsToInject = `
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
     <style id="pwa-base">
       /* ── Full-bleed PWA viewport fix ──────────────────────────────
-         iOS PWA standalone + viewport-fit=cover creates a visual viewport
-         taller than 100vh. The body stops short and background leaks at
-         the bottom. Fix: pin body to the real viewport via position:fixed
-         + inset:0, then force #root and EVERY Expo Router wrapper div
-         (up to 6 levels deep) to flex-stretch so the chain is unbroken
-         all the way from body → actual screen component.                */
+         iOS PWA standalone + viewport-fit=cover creates a visual
+         viewport taller than 100vh. Pin body to the real viewport
+         via position:fixed + inset:0, then cascade flex:1 down
+         through Expo Router's wrapper divs so the chain is unbroken
+         from body → actual screen component.
+
+         We intentionally omit !important so React Native Web's
+         inline styles (e.g. flex-direction:row on a tab row) still
+         take precedence over these defaults.                        */
       html {
         margin: 0; padding: 0;
         height: 100%; height: 100dvh;
@@ -75,18 +78,16 @@ const tagsToInject = `
         min-height: 0;
         height: 100%;
       }
-      /* :only-child targets Expo Router's single-child wrapper divs without
-         affecting multi-child containers like the tab bar row.             */
-      #root > div:only-child,
-      #root > div:only-child > div:only-child,
-      #root > div:only-child > div:only-child > div:only-child,
-      #root > div:only-child > div:only-child > div:only-child > div:only-child,
-      #root > div:only-child > div:only-child > div:only-child > div:only-child > div:only-child,
-      #root > div:only-child > div:only-child > div:only-child > div:only-child > div:only-child > div:only-child {
-        display: flex !important;
-        flex-direction: column !important;
-        flex: 1 !important;
-        min-height: 0 !important;
+      #root > div,
+      #root > div > div,
+      #root > div > div > div,
+      #root > div > div > div > div,
+      #root > div > div > div > div > div,
+      #root > div > div > div > div > div > div {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
       }
 
       /* iOS Safari auto-zooms focused inputs with font-size < 16px. */
