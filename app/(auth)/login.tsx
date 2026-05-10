@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  View, TouchableOpacity, ActivityIndicator, Platform, StyleSheet,
+  View, TouchableOpacity, ActivityIndicator, Platform, ScrollView, StyleSheet,
 } from 'react-native';
 import { notifyAlert } from '../../utils/alert';
 import { useRouter } from 'expo-router';
@@ -105,7 +105,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.root}>
       {/* Background */}
-      <View style={StyleSheet.absoluteFill}>
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <LinearGradient
           colors={['#F3EAD8', '#FAF6EF', '#FFFDF9']}
           start={{ x: 0.3, y: 0 }}
@@ -117,105 +117,116 @@ export default function LoginScreen() {
         <View style={[styles.blob, { top: '40%', left: '50%', width: 160, height: 160, backgroundColor: '#EDD5A8',          opacity: 0.38 }]} />
       </View>
 
-      {/* Content area */}
-      <View style={[styles.content, { paddingTop: insets.top + spacing['10'] }]}>
-        {/* App icon */}
-        <View style={styles.logoSection}>
-          <View style={styles.logoOuterRing}>
-            <LinearGradient
-              colors={colors.gradient.header}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.logoBox}
-            >
-              <Ionicons name="wallet" size={46} color="#FFF0D0" />
-            </LinearGradient>
-          </View>
-        </View>
-
-        {/* Title */}
-        <View style={styles.titleSection}>
-          <AppText variant="title" weight="bold" align="center" style={{ color: colors.text.primary }}>
-            My
-          </AppText>
-          <AppText variant="title" weight="extrabold" align="center" style={{ color: colors.brand[500] }}>
-            Money
-          </AppText>
-            <AppText
-            variant="bodyMd"
-            tone="tertiary"
-            align="center"
-            style={{ marginTop: spacing['3'], lineHeight: 26 }}
-          >
-            {t.login.tagline}
-          </AppText>
-        </View>
-
-        {/* Feature badges */}
-        <View style={styles.badges}>
-          {FEATURES.map((f) => (
-            <GlassCard key={f.label} tone="tint" radius="pill" shadow="xs" style={styles.badge}>
-              <Ionicons name={f.icon} size={13} color={f.color} />
-              <AppText variant="caption" weight="semibold" style={{ marginLeft: 5, color: f.color }}>
-                {f.label}
-              </AppText>
-            </GlassCard>
-          ))}
-        </View>
-      </View>
-
-      {/* Login card */}
-      <View style={[styles.cardWrap, { paddingBottom: insets.bottom + spacing['8'] }]}>
-        <GlassCard tone="light" radius="2xl" shadow="md" style={styles.card}>
-          <View style={styles.cardInner}>
-            <AppText variant="h2" weight="bold" align="center">{t.login.start}</AppText>
-            <AppText variant="caption" tone="tertiary" align="center" style={{ marginTop: 4, marginBottom: spacing['5'] }}>
-              {t.login.demoNote}
-            </AppText>
-
-            <TouchableOpacity
-              onPress={handleGoogleLogin}
-              disabled={loading}
-              activeOpacity={0.82}
-              style={styles.googleBtn}
-            >
-              {loading ? (
-                <ActivityIndicator color={colors.brand[500]} />
-              ) : (
-                <>
-                  <View style={styles.googleIconBox}>
-                    <AppText variant="h3" weight="extrabold" style={{ color: '#4285F4' }}>G</AppText>
-                  </View>
-                  <AppText variant="bodyMd" weight="semibold">{t.login.googleBtn}</AppText>
-                </>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleDemoLogin}
-              disabled={loading}
-              activeOpacity={0.85}
-              style={[styles.demoBtn, { opacity: loading ? 0.6 : 1 }]}
-            >
+      {/* Scrollable wrapper so short viewports never collapse the layout */}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingTop:    insets.top + spacing['8'],
+            paddingBottom: insets.bottom + spacing['6'],
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        {/* Hero block: logo, title, features */}
+        <View style={styles.hero}>
+          <View style={styles.logoSection}>
+            <View style={styles.logoOuterRing}>
               <LinearGradient
-                colors={colors.gradient.brand}
+                colors={colors.gradient.header}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.demoBtnGrad}
+                style={styles.logoBox}
               >
-                <Ionicons name="eye" size={18} color="white" />
-                <AppText variant="h3" weight="semibold" tone="inverse" style={{ marginLeft: spacing['2'] }}>
-                  {t.login.demoBtn}
-                </AppText>
+                <Ionicons name="wallet" size={46} color="#FFF0D0" />
               </LinearGradient>
-            </TouchableOpacity>
+            </View>
+          </View>
 
-            <AppText variant="micro" tone="tertiary" align="center" style={{ marginTop: spacing['3'] }}>
-              {t.login.demoNote}
+          <View style={styles.titleSection}>
+            <AppText variant="title" weight="bold" align="center" style={{ color: colors.text.primary }}>
+              My
+            </AppText>
+            <AppText variant="title" weight="extrabold" align="center" style={{ color: colors.brand[500] }}>
+              Money
+            </AppText>
+            <AppText
+              variant="bodyMd"
+              tone="tertiary"
+              align="center"
+              style={{ marginTop: spacing['3'], lineHeight: 26 }}
+            >
+              {t.login.tagline}
             </AppText>
           </View>
-        </GlassCard>
-      </View>
+
+          <View style={styles.badges}>
+            {FEATURES.map((f) => (
+              <GlassCard key={f.label} tone="tint" radius="pill" shadow="xs" style={styles.badge}>
+                <Ionicons name={f.icon} size={13} color={f.color} />
+                <AppText variant="caption" weight="semibold" style={{ marginLeft: 5, color: f.color }}>
+                  {f.label}
+                </AppText>
+              </GlassCard>
+            ))}
+          </View>
+        </View>
+
+        {/* Login card */}
+        <View style={styles.cardWrap}>
+          <GlassCard tone="light" radius="2xl" shadow="md" style={styles.card}>
+            <View style={styles.cardInner}>
+              <AppText variant="h2" weight="bold" align="center">{t.login.start}</AppText>
+              <AppText variant="caption" tone="tertiary" align="center" style={{ marginTop: 4, marginBottom: spacing['5'] }}>
+                {t.login.demoNote}
+              </AppText>
+
+              <TouchableOpacity
+                onPress={handleGoogleLogin}
+                disabled={loading}
+                activeOpacity={0.82}
+                style={styles.googleBtn}
+              >
+                {loading ? (
+                  <ActivityIndicator color={colors.brand[500]} />
+                ) : (
+                  <>
+                    <View style={styles.googleIconBox}>
+                      <AppText variant="h3" weight="extrabold" style={{ color: '#4285F4' }}>G</AppText>
+                    </View>
+                    <AppText variant="bodyMd" weight="semibold">{t.login.googleBtn}</AppText>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleDemoLogin}
+                disabled={loading}
+                activeOpacity={0.85}
+                style={[styles.demoBtn, { opacity: loading ? 0.6 : 1 }]}
+              >
+                <LinearGradient
+                  colors={colors.gradient.brand}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.demoBtnGrad}
+                >
+                  <Ionicons name="eye" size={18} color="white" />
+                  <AppText variant="h3" weight="semibold" tone="inverse" style={{ marginLeft: spacing['2'] }}>
+                    {t.login.demoBtn}
+                  </AppText>
+                </LinearGradient>
+              </TouchableOpacity>
+
+              <AppText variant="micro" tone="tertiary" align="center" style={{ marginTop: spacing['3'] }}>
+                {t.login.demoNote}
+              </AppText>
+            </View>
+          </GlassCard>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -223,13 +234,18 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface.base },
   blob: { position: 'absolute', borderRadius: 999 },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow:       1,
+    justifyContent: 'space-between',
+    minHeight:      '100%' as never,
+  },
+  hero: {
     alignItems:        'center',
     justifyContent:    'center',
     paddingHorizontal: spacing['6'],
+    paddingBottom:     spacing['8'],
   },
-  logoSection:  { alignItems: 'center', marginBottom: spacing['8'] },
+  logoSection:  { alignItems: 'center', marginBottom: spacing['6'] },
   logoOuterRing:{
     width: 130, height: 130,
     borderRadius:    radii['2xl'] + 10,

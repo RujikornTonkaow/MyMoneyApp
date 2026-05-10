@@ -17,35 +17,62 @@ const FAB_SIZE = 46;   // diameter of the circular FAB button (inside card)
 function GlassFill() {
   if (Platform.OS === 'ios') {
     return (
-      <BlurView
-        intensity={80}
-        tint="light"
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
+      <>
+        <BlurView
+          intensity={80}
+          tint="light"
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+        <View style={styles.glassBase} pointerEvents="none" />
+        <LinearGradient
+          colors={['rgba(255,255,255,0.46)', 'rgba(255,255,255,0.10)', 'rgba(255,255,255,0.00)']}
+          locations={[0, 0.45, 1]}
+          start={{ x: 0.3, y: 0 }}
+          end={{ x: 0.7, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      </>
     );
   }
   if (Platform.OS === 'web') {
     return (
-      <View
-        pointerEvents="none"
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            backgroundColor: 'rgba(250,246,239,0.88)',
-            // @ts-ignore
-            backdropFilter: 'blur(22px)',
-            WebkitBackdropFilter: 'blur(22px)',
-          } as never,
-        ]}
-      />
+      <>
+        <View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor:      'rgba(255,250,240,0.22)',
+              backdropFilter:       'blur(28px) saturate(1.35)',
+              WebkitBackdropFilter: 'blur(28px) saturate(1.35)',
+            } as never,
+          ]}
+        />
+        <LinearGradient
+          colors={['rgba(255,255,255,0.48)', 'rgba(255,255,255,0.12)', 'rgba(255,255,255,0.00)']}
+          locations={[0, 0.45, 1]}
+          start={{ x: 0.2, y: 0 }}
+          end={{ x: 0.8, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      </>
     );
   }
   return (
-    <View
-      pointerEvents="none"
-      style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(250,246,239,0.96)' }]}
-    />
+    <>
+      <View pointerEvents="none" style={styles.glassBase} />
+      <LinearGradient
+        colors={['rgba(255,255,255,0.42)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0.00)']}
+        locations={[0, 0.45, 1]}
+        start={{ x: 0.3, y: 0 }}
+        end={{ x: 0.7, y: 1 }}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+    </>
   );
 }
 
@@ -110,8 +137,13 @@ function TabBar({ state, descriptors, navigation }: {
     );
   };
 
+  // Floating tab card sits a small fixed gap above the safe-area edge so
+  // the home-indicator never overlaps it but it still hugs the bottom.
+  const FLOAT_GAP = 6;
+  const bottomPad = (insets.bottom > 0 ? insets.bottom : spacing['3']) + FLOAT_GAP;
+
   return (
-    <View style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, spacing['3']) }]}>
+    <View style={[styles.wrapper, { paddingBottom: bottomPad }]} pointerEvents="box-none">
       {/* Single glass card containing all 3 items */}
       <View style={styles.card}>
         <GlassFill />
@@ -188,13 +220,21 @@ const styles = StyleSheet.create({
     height:       TAB_H,
     borderRadius: radii['2xl'],
     overflow:     'hidden',
+    backgroundColor: 'rgba(255,250,240,0.16)',
     ...shadows.lg,
+  },
+  glassBase: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,250,240,0.22)',
   },
   cardBorder: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: radii['2xl'],
-    borderWidth:  StyleSheet.hairlineWidth,
-    borderColor:  colors.border.glass,
+    borderWidth:       1.2,
+    borderTopColor:    'rgba(255,255,255,0.80)',
+    borderLeftColor:   'rgba(255,255,255,0.70)',
+    borderBottomColor: 'rgba(200,160,100,0.24)',
+    borderRightColor:  'rgba(200,160,100,0.22)',
   },
 
   // Row inside the card
