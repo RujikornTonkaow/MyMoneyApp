@@ -51,16 +51,38 @@ const tagsToInject = `
          pull-to-refresh, or rubber-band scroll never flashes white. */
       html, body { background-color: #F3EAD8; }
 
-      /* iOS PWA quirk: the default 100% / 100vh measurement does NOT
-         include the area underneath the home-indicator, so the React
-         root ends up shorter than the visible window and the cream body
-         shows through at the bottom. 100dvh tracks the *visual* viewport
-         and grows under the home-indicator, eliminating that empty strip.
-         100% is kept as a fallback for browsers without dvh support. */
-      html, body, #root {
+      /* iOS PWA standalone has two stubborn quirks:
+         1. height:100% / 100vh resolves to the LAYOUT viewport, which is
+            shorter than the visual viewport when the home-indicator and
+            translucent status bar are involved, so the body bg leaks
+            through at the bottom.
+         2. The body is allowed to rubber-band-scroll on iOS, leaving an
+            empty strip when the user drags the page.
+         Locking the body with position:fixed + 100dvh forces the React
+         root to span the FULL visible window edge-to-edge and prevents
+         body scroll. Inner ScrollViews keep their own scrolling. */
+      html { height: 100%; }
+      body {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
         height: 100%;
         height: 100dvh;
-        min-height: 100dvh;
+        overflow: hidden;
+      }
+      #root {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        display: flex;
       }
 
       /* iOS Safari auto-zooms into any focused input whose font-size is
