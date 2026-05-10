@@ -40,13 +40,18 @@ export default function LoginScreen() {
   const enterDemo = useAuthStore((s) => s.enterDemo);
   const [loading, setLoading] = useState(false);
 
-  // On web, after Google redirects back to /auth/callback, tokens arrive
-  // in the URL fragment. Parse them once on mount to complete the session.
+  // On web, after Google redirects back with #access_token=... in the
+  // URL hash, Supabase's detectSessionInUrl handles it automatically.
+  // We only need to clean the hash so it doesn't linger in the address bar.
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     if (typeof window === 'undefined') return;
     if (!window.location.hash.includes('access_token')) return;
-    createSessionFromUrl(window.location.href).catch(() => {});
+    // Wait one tick for Supabase to consume the hash, then strip it.
+    const t = setTimeout(() => {
+      window.history.replaceState(null, '', window.location.pathname);
+    }, 50);
+    return () => clearTimeout(t);
   }, []);
 
   const FEATURES = [
@@ -60,22 +65,24 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const redirectTo = makeRedirectUri({
-        scheme: 'mymoneyapp',
-        path:   'auth/callback',
-      });
-
-      // Web: let Supabase redirect the main window directly. Native: open
-      // an in-app browser session and read the redirected URL ourselves.
+      // Web: redirect back to the site root so we don't depend on a
+      // /auth/callback route existing in the SPA. Native: use the custom
+      // scheme deep link that the in-app browser will catch.
       if (Platform.OS === 'web') {
+        const webRedirect =
+          typeof window !== 'undefined' ? window.location.origin + '/' : undefined;
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo },
+          options: { redirectTo: webRedirect },
         });
         if (error) throw error;
         return;
       }
 
+      const redirectTo = makeRedirectUri({
+        scheme: 'mymoneyapp',
+        path:   'auth/callback',
+      });
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo, skipBrowserRedirect: true },
