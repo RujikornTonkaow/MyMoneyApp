@@ -47,7 +47,22 @@ const tagsToInject = `
     <meta name="format-detection" content="telephone=no">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, shrink-to-fit=no">
     <style id="pwa-base">
+      /* Match the warm cream theme so any unfilled pixel during boot,
+         pull-to-refresh, or rubber-band scroll never flashes white. */
       html, body { background-color: #F3EAD8; }
+
+      /* iOS PWA quirk: the default 100% / 100vh measurement does NOT
+         include the area underneath the home-indicator, so the React
+         root ends up shorter than the visible window and the cream body
+         shows through at the bottom. 100dvh tracks the *visual* viewport
+         and grows under the home-indicator, eliminating that empty strip.
+         100% is kept as a fallback for browsers without dvh support. */
+      html, body, #root {
+        height: 100%;
+        height: 100dvh;
+        min-height: 100dvh;
+      }
+
       /* iOS Safari auto-zooms into any focused input whose font-size is
          smaller than 16px and never zooms back out. Force every form
          control to 16px so the page stays at its natural scale. */
