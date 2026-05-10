@@ -146,12 +146,14 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.titleSection}>
-            <AppText variant="title" weight="bold" align="center" style={{ color: colors.text.primary }}>
-              My
-            </AppText>
-            <AppText variant="title" weight="extrabold" align="center" style={{ color: colors.brand[500] }}>
-              Money
-            </AppText>
+            <View style={styles.titleRow}>
+              <AppText variant="title" weight="bold" style={{ color: colors.text.primary }}>
+                My{' '}
+              </AppText>
+              <AppText variant="title" weight="extrabold" style={{ color: colors.brand[500] }}>
+                Money
+              </AppText>
+            </View>
             <AppText
               variant="bodyMd"
               tone="tertiary"
@@ -262,6 +264,12 @@ const styles = StyleSheet.create({
     ...shadows.brand,
   },
   titleSection: { alignItems: 'center', marginBottom: spacing['7'] },
+  titleRow: {
+    flexDirection:  'row',
+    flexWrap:        'nowrap',
+    alignItems:      'baseline',
+    justifyContent:  'center',
+  },
   badges: {
     flexDirection:  'row',
     flexWrap:       'wrap',
