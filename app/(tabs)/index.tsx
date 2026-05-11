@@ -97,7 +97,7 @@ export default function HomeScreen() {
       <OfflineBanner />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 64 + spacing['6'] }}
+        // contentContainerStyle={{ paddingBottom: insets.bottom + 64 + spacing['6'] }}
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.brand[500]} />
         }
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface.base },
   topBar: {
     paddingHorizontal: spacing['5'],
-    paddingBottom:     spacing['5'],
+    // paddingBottom:     spacing['5'],
     backgroundColor:   colors.surface.base,
     overflow:          'hidden',
   },
