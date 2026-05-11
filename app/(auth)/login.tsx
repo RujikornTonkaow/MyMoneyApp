@@ -112,9 +112,9 @@ export default function LoginScreen() {
           end={{ x: 0.7, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
-        <View style={[styles.blob, { top: -100, right: -80,   width: 300, height: 300, backgroundColor: colors.brand[200], opacity: 0.50 }]} />
+        {/* <View style={[styles.blob, { top: -100, right: -80,   width: 300, height: 300, backgroundColor: colors.brand[200], opacity: 0.50 }]} />
         <View style={[styles.blob, { bottom: 60, left: -80,   width: 260, height: 260, backgroundColor: colors.brand[100], opacity: 0.55 }]} />
-        <View style={[styles.blob, { top: '40%', left: '50%', width: 160, height: 160, backgroundColor: '#EDD5A8',          opacity: 0.38 }]} />
+        <View style={[styles.blob, { top: '40%', left: '50%', width: 160, height: 160, backgroundColor: '#EDD5A8',          opacity: 0.38 }]} /> */}
       </View>
 
       {/* Scrollable wrapper so short viewports never collapse the layout */}
