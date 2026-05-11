@@ -202,7 +202,11 @@ export default function TabsLayout() {
          (web/PWA and sometimes iOS). */
       detachInactiveScreens={false}
       tabBar={(props) => <TabBar {...(props as Parameters<typeof TabBar>[0])} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ 
+        headerShown: false,
+        tabBarTransparent: true, // Force screens to fill the whole space
+      }}
+      sceneContainerStyle={{ backgroundColor: 'transparent' }} // Let root bg handle it or screens
     >
       <Tabs.Screen name="index"    options={{ tabBarLabel: t.nav.overview, title: t.nav.overview }} />
       <Tabs.Screen name="history"  options={{ tabBarLabel: t.nav.history,  title: t.nav.history  }} />
