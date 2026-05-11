@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F3EAD8"
+      "backgroundColor": "#FEFEFE"
     },
     "ios": {
       "supportsTablet": true
@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F3EAD8"
+        "backgroundColor": "#FEFEFE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -32,7 +32,7 @@
       "shortName": "My Money",
       "lang": "th",
       "themeColor": "#C49650",
-      "backgroundColor": "#F3EAD8",
+      "backgroundColor": "#FEFEFE",
       "display": "standalone",
       "orientation": "portrait",
       "description": "Personal finance tracker",
