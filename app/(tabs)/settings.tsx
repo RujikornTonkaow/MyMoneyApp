@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   root:   { flex: 1, backgroundColor: colors.surface.base },
   header: {
     paddingHorizontal: spacing['5'],
-    paddingBottom:     spacing['5'],
+    // paddingBottom:     spacing['5'],
     backgroundColor:   colors.surface.base,
     overflow:          'hidden',
   },

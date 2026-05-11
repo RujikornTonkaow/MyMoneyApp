@@ -21,7 +21,7 @@ export const colors = {
   },
   // Surfaces — warm sand tones
   surface: {
-    base:      '#F3EAD8',              // main background (user-specified)
+    base:      '#F3EAD8',              // main background (sand tone)
     raised:    '#FAF6EF',              // elevated card background
     white:     '#FFFDF9',              // near-white warm
     glass:     'rgba(255,252,246,0.65)',  // very transparent warm glass

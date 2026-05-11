@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   // ── Header ──────────────────────────────────────────────────────────────
   header: {
     paddingHorizontal: spacing['5'],
-    paddingBottom:     spacing['5'],
+    // paddingBottom:     spacing['5'],
     borderBottomLeftRadius:  radii['3xl'],
     borderBottomRightRadius: radii['3xl'],
     overflow: 'hidden',
